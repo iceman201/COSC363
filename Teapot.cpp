@@ -1,6 +1,6 @@
 //  ========================================================================
 //  COSC363: Computer Graphics (2014);  University of Canterbury.
-//  Liguo Jiao (Leandro)
+//
 //  FILE NAME: Teapot.cpp
 //  See Lab01.pdf for details
 //  ========================================================================
@@ -27,6 +27,13 @@ void special(int key, int x, int y)
 	else if(key == GLUT_KEY_DOWN){
 		cam_hgt--;
 	}
+	else if(key == GLUT_KEY_LEFT){
+		theta--;
+	}
+	else if(key == GLUT_KEY_RIGHT){
+		theta++;
+	}
+	
 	glutPostRedisplay();
 }
 
@@ -67,7 +74,7 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	//gluLookAt(0, 0, 0, -100, 0, 0, 0, 1, 0);
+	//gluLookAt(1, 1, 1, 0.0, 0, 1, 0, 1, 0);
     gluLookAt(12*sin(theta*(M_PI*1/180)),cam_hgt,12*cos(theta*((M_PI)*(1/180))),0.0, 0.0, 0.0, 0.0, 1.0, 0.0);  //Camera position and orientation
 
 	glLightfv(GL_LIGHT0,GL_POSITION, lpos);   //Set light position
@@ -77,6 +84,11 @@ void display(void)
 	glEnable(GL_LIGHTING);			//Enable lighting for the teapot
     glColor3f(0.0, 1.0, 1.0);
     glTranslated(0., 0.8, 0.0);		//Move the teapot up by 0.8 units
+    
+    //glScalef(1, 1, -1);
+    
+	//glutSolidCube(1.0);
+	//glRotatef(30.0, 0.0, 1.0, 0.0);
     glutSolidTeapot(1.0);           // size of Teapot
 
 	glFlush(); 
@@ -111,7 +123,7 @@ int main(int argc, char **argv)
 	initialize();
 
 	glutSpecialFunc(special);
-	glutTimerFunc(50, myTimer, 0);
+	//glutTimerFunc(10, myTimer, 0);
 
 	glutDisplayFunc(display);
 	glutMainLoop();
