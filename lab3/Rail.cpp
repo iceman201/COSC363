@@ -23,9 +23,9 @@ void floor()
 	  {
 		glVertex3i(i, 0.0, j);
 		glVertex3i(i, 0.0, j+1);
-		glNormal3f(i+1, 0.0, j+1);
+		//glNormal3f(i+1, 0.0, j+1);
         glVertex3f(i+1, 0.0, j+1);
-		glNormal3f(i+1, 0.0, j);
+		//glNormal3f(i+1, 0.0, j);
         glVertex3f(i+1, 0.0, j);
 	  }
   }
@@ -189,17 +189,17 @@ void initialize(void)
     glColor4f(0., 0., 1., 1.);
     
 }
-float lgt_pos[3] = {0,50,0};
 float wagon_theta = 0;
 //-------------------------------------------------------------------
 void display(void)
 {
 
+    float lgt_pos[4] = {0,50,0,1};
     glClear (GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
         
-    gluLookAt (0, 100, 100, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt (0, 50, 200, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0);
     glLightfv(GL_LIGHT0, GL_POSITION, lgt_pos);       //Light's position
     floor();
     tracks();  

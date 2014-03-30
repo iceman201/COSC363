@@ -75,7 +75,7 @@ void display(void)
 	glLoadIdentity();
 
 	//gluLookAt(1, 1, 1, 0.0, 0, 1, 0, 1, 0);
-    gluLookAt(12*sin(theta*(M_PI*1/180)),cam_hgt,12*cos(theta*((M_PI)*(1/180))),0.0, 0.0, 0.0, 0.0, 1.0, 0.0);  //Camera position and orientation
+    gluLookAt(12*sin(theta*(2*M_PI*1/360)),cam_hgt,12*cos(theta*((2*M_PI)*(1/360))),0.0, 0.0, 0.0, 0.0, 1.0, 0.0);  //Camera position and orientation
 
 	glLightfv(GL_LIGHT0,GL_POSITION, lpos);   //Set light position
 
