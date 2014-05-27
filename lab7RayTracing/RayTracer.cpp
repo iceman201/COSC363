@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <cmath>
+#include "Plane.h"
 #include <vector>
 #include "Vector.h"
 #include "Sphere.h"
@@ -76,20 +77,18 @@ PointBundle closestPt(Vector pos, Vector dir)
 Color trace(Vector pos, Vector dir, int step)
 {
     PointBundle q = closestPt(pos, dir);
-
+    Color colorSum = Color(0.2f,0.2f,0.2f);
+    if(q.index == -1) {
+        return backgroundCol;        //no intersection
+    }
     Vector n = sceneObjects[q.index]->normal(q.point);
     Vector l = light - q.point;
     l.normalise();
     float lDotn = l.dot(n);
-//    Color col = sceneObjects[q.index]->getColor();
-    if(q.index == -1) {
-        return backgroundCol;        //no intersection
-    }
     Color col = sceneObjects[q.index]->getColor(); //Object's colour
     
-    //if the dot product is <= 0
     if (l.dot(n) <= 0){
-        return col.phongLight(backgroundCol,0.0,0.0);
+        colorSum = col.phongLight(backgroundCol,0.0,0.0);
     }
     else{
         Vector r = ((n * 2) * lDotn) - l; // r = 2(L.n)n – L. ‘l’ = el 
@@ -97,15 +96,23 @@ Color trace(Vector pos, Vector dir, int step)
         Vector v(-dir.x, -dir.y, -dir.z); //View vector; 
         float rDotv = r.dot(v); 
         float spec; 
-    
+        float reflCoeff;
         if(rDotv < 0) spec = 0.0; 
         else spec = pow(rDotv, 10); //Phong exponent = 10
         
         PointBundle shadow = closestPt(q.point, l);
+        Vector reflectionVector = ((n*2)*(n.dot(v)))-v;
+        reflCoeff = 0.8;
         if (shadow.index == -1){
-            return col.phongLight(backgroundCol,lDotn,spec);
+//            return col.phongLight(backgroundCol,lDotn,spec);
+            colorSum = col.phongLight(backgroundCol,lDotn,spec);
+            
         }
-        return col.phongLight(backgroundCol,lDotn/2,0);
+        if (q.index == 0 && step < MAX_STEPS){
+                Color reflectionCol = trace(q.point,reflectionVector,step+1);
+                colorSum.combineColor(reflectionCol,reflCoeff);
+        }
+        return colorSum;
     }
     //return col//
 }
@@ -163,9 +170,17 @@ void initialize()
     glLoadIdentity();
     glClearColor(0, 0, 0, 1);
     // New stuff adding down here //
-    Sphere *sphere1 = new Sphere(Vector(5,6,-70),3.0, Color::RED);
+    Sphere *sphere1 = new Sphere(Vector(7, -5, -70), 5.0, Color::RED);
     sceneObjects.push_back(sphere1);
+    Sphere *sphere3 = new Sphere(Vector(0, 6, -170), 15.0, Color::BLUE);
+    sceneObjects.push_back(sphere3);
+    Sphere *sphere4 = new Sphere(Vector(8, 2, -50), 3.0, Color::GREEN);
+    sceneObjects.push_back(sphere4);
+    Sphere *sphere5 = new Sphere(Vector(9, 7, -50), 2.0, Color::BLACK);
+    sceneObjects.push_back(sphere5);
     
+    Plane *plane = new Plane(Vector(-10,-10,-40),Vector(10,-10,-40),Vector(10,-10,-80),Vector(-10,-10,-80), Color(0,1,1));
+    sceneObjects.push_back(plane);
 }
 
 int main(int argc, char *argv[]) 
