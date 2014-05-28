@@ -12,6 +12,9 @@
 #include "Color.h"
 #include "Object.h"
 #include <GL/glut.h>
+
+//#include <GL/glew.h>
+#include <GL/freeglut.h>
 using namespace std;
 
 const float WIDTH = 20.0;  
@@ -77,7 +80,7 @@ PointBundle closestPt(Vector pos, Vector dir)
 Color trace(Vector pos, Vector dir, int step)
 {
     PointBundle q = closestPt(pos, dir);
-    Color colorSum = Color(0.2f,0.2f,0.2f);
+    Color colorSum;
     if(q.index == -1) {
         return backgroundCol;        //no intersection
     }
@@ -104,9 +107,10 @@ Color trace(Vector pos, Vector dir, int step)
         Vector reflectionVector = ((n*2)*(n.dot(v)))-v;
         reflCoeff = 0.8;
         if (shadow.index == -1){
-//            return col.phongLight(backgroundCol,lDotn,spec);
             colorSum = col.phongLight(backgroundCol,lDotn,spec);
-            
+        }
+        else{
+            colorSum = col.phongLight(backgroundCol,lDotn/3,0);
         }
         if (q.index == 0 && step < MAX_STEPS){
                 Color reflectionCol = trace(q.point,reflectionVector,step+1);
@@ -170,7 +174,7 @@ void initialize()
     glLoadIdentity();
     glClearColor(0, 0, 0, 1);
     // New stuff adding down here //
-    Sphere *sphere1 = new Sphere(Vector(7, -5, -70), 5.0, Color::RED);
+    Sphere *sphere1 = new Sphere(Vector(5, -5, -70), 5.0, Color::RED);
     sceneObjects.push_back(sphere1);
     Sphere *sphere3 = new Sphere(Vector(0, 6, -170), 15.0, Color::BLUE);
     sceneObjects.push_back(sphere3);
@@ -179,7 +183,7 @@ void initialize()
     Sphere *sphere5 = new Sphere(Vector(9, 7, -50), 2.0, Color::BLACK);
     sceneObjects.push_back(sphere5);
     
-    Plane *plane = new Plane(Vector(-10,-10,-40),Vector(10,-10,-40),Vector(10,-10,-80),Vector(-10,-10,-80), Color(0,1,1));
+    Plane *plane = new Plane(Vector(-10,-10,-40),Vector(10,-10,-40),Vector(10,-10,-80),Vector(-10,-10,-80), Color(1,1,1));
     sceneObjects.push_back(plane);
 }
 
@@ -190,8 +194,10 @@ int main(int argc, char *argv[])
     glutInitWindowSize(600, 600);
     glutInitWindowPosition(20, 20);
     glutCreateWindow("Raytracing");
-
-    glutDisplayFunc(display);
+    glutInitContextVersion (4, 2);
+    glutInitContextProfile (GLUT_CORE_PROFILE);
+    
+        glutDisplayFunc(display);
     initialize();
 
     glutMainLoop();

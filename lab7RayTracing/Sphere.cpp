@@ -15,23 +15,29 @@
 float Sphere::intersect(Vector pos, Vector dir)
 {
     Vector vdif = pos - center;
-    float b = dir.dot(vdif);
-    float len = vdif.length();
-    float c = len*len - radius*radius;
+    
+    float b = dir.dot(vdif); //  give a (P-C) the direction
+    
+    float len = vdif.length(); // get the length of the direction
+    
+    float c = len*len - radius*radius; // C of quadratic equation 
+    
     float delta = b*b - c;
    
 	if(fabs(delta) < 0.001) return -1.0; 
     if(delta < 0.0) return -1.0;
 
-    float t1 = -b - sqrt(delta);
-    float t2 = -b + sqrt(delta);
+
+    float t1 = -b - sqrt(delta); // unit vector
+    float t2 = -b + sqrt(delta); // unit vector
+    
+    
     if(fabs(t1) < 0.001 )
     {
         if (t2 > 0) return t2;
         else t1 = -1.0;
     }
     if(fabs(t2) < 0.001 ) t2 = -1.0;
-
 	return (t1 < t2)? t1: t2;
 }
 

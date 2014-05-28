@@ -52,7 +52,7 @@ void initialise(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor (1.0, 1.0, 1.0, 0.0);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity();

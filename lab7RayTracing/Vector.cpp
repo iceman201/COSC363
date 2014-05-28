@@ -107,7 +107,7 @@ float Vector::dot(const Vector rhs) const
 float Vector::dist(const Vector rhs) const 
 {
     Vector vdif = (*this)-rhs;
-    return vdif.length();
+    return vdif.length(); 
 }
 
 // Returns the length of this vector
