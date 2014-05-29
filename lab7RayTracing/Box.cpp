@@ -26,16 +26,28 @@ float Box::intersect(Vector pos, Vector dir)
     float t1 = (-b - sqrt(delta))/(2*a);
     float t2 = (-b + sqrt(delta))/(2*a);
     
-    float t;
+    float r1 = pos.y + t1*dir.y;
+    float r2 = pos.y + t2*dir.y;
     
-    if (t1 > t2) t = t2;
-    else t = t1;
-    float r = pos.y + t*dir.y;
-    
-    if ((r > center.y - height) and (r < height)){
-        return t;
+    if (r1 > 0) {
+        if ((r1 > center.y - height) and (r1 < height)){
+            return t1;
+        }
     }
-    else return -1;
+    if (r2 > 0) {
+        if ((r2 > center.y-height) and (r2 < height)){
+            return t2;
+        }
+    }
+    if ((r1 > 0) and (r2 > 0)){
+        if (r1 > r2){
+            return t2;
+        }
+        if (r1 < r2){
+            return t1;
+        }
+    }
+    return -1;
 }
 
 /**
