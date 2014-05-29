@@ -9,6 +9,7 @@
 #include <vector>
 #include "Vector.h"
 #include "Sphere.h"
+#include "Box.h"
 #include "Color.h"
 #include "Object.h"
 #include <GL/glut.h>
@@ -176,12 +177,15 @@ void initialize()
     // New stuff adding down here //
     Sphere *sphere1 = new Sphere(Vector(5, -5, -70), 5.0, Color::RED);
     sceneObjects.push_back(sphere1);
-    Sphere *sphere3 = new Sphere(Vector(0, 6, -170), 15.0, Color::BLUE);
-    sceneObjects.push_back(sphere3);
+//    Sphere *sphere3 = new Sphere(Vector(0, 6, -170), 15.0, Color::BLUE);
+  //  sceneObjects.push_back(sphere3);
     Sphere *sphere4 = new Sphere(Vector(8, 2, -50), 3.0, Color::GREEN);
     sceneObjects.push_back(sphere4);
     Sphere *sphere5 = new Sphere(Vector(9, 7, -50), 2.0, Color::BLACK);
     sceneObjects.push_back(sphere5);
+    
+    Box *box1 = new Box(Vector(0, 0, -50), 10.0, 50.0, Color::BLACK);
+    sceneObjects.push_back(box1);    
     
     Plane *plane = new Plane(Vector(-10,-10,-40),Vector(10,-10,-40),Vector(10,-10,-80),Vector(-10,-10,-80), Color(1,1,1));
     sceneObjects.push_back(plane);

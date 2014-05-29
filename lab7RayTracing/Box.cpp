@@ -6,37 +6,36 @@
 /----------------------------------------*/
 
 #include "Box.h"
-#include "Vector.h"
+
 #include <math.h>
 
 float Box::intersect(Vector pos, Vector dir)
 {
-
-    if (((pos.y - center.y) >= 0) && ((pos.y - center.y) <= height)){
-        Vector vdif = (pos.x - center.x) * (pos.x - center.x) + (pos.z - center.z) * (pos.z - center.z);
-    }
+//    Vector n = normal(pos); 
+    //Vector vdif = Vector(pos.x, 0, pos.y) - Vector(center.x, 0, center.y);
     
-    Vector n = normal(pos);    
+    float a = (dir.x * dir.x) + (dir.z * dir.z);
+    float b = 2*(dir.x*(pos.x-center.x) + dir.z*(pos.z-center.z));
+    float c = (pos.x - center.x) * (pos.x - center.x) + (pos.z - center.z) * (pos.z - center.z);
     
-    float len = vdif.length();
-    float b = dir.x*(pos.x-center.x) + dir.z*(pos.z-center.z);
-    
-    float c = len*len - radius*radius;
-
-   
+    float delta = b*b - 4*(a*c);
+      
 	if(fabs(delta) < 0.001) return -1.0; 
     if(delta < 0.0) return -1.0;
-
-    float t1 = -b - sqrt(delta);
-    float t2 = -b + sqrt(delta);
-    ////////////////////////////////
-    if(fabs(t1) < 0.001)
-    {
-        if (t2 > 0) return t2;
-        else t1 = -1.0;
+    
+    float t1 = (-b - sqrt(delta))/(2*a);
+    float t2 = (-b + sqrt(delta))/(2*a);
+    
+    float t;
+    
+    if (t1 > t2) t = t2;
+    else t = t1;
+    float r = pos.y + t*dir.y;
+    
+    if ((r > center.y - height) and (r < height)){
+        return t;
     }
-    if(fabs(t2) < 0.001 ) t2 = -1.0;
-	return (t1 < t2)? t1: t2;
+    else return -1;
 }
 
 /**

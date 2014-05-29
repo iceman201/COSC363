@@ -21,7 +21,7 @@ public:
 		color = Color::WHITE;
 	};
 	
-    Box(Vector c, float r, float h Color col)
+    Box(Vector c, float r, float h, Color col)
 		: center(c), radius(r), height(h)
 	{
 		color = col;

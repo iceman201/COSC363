@@ -17,9 +17,7 @@ float Sphere::intersect(Vector pos, Vector dir)
     Vector vdif = pos - center;
     
     float b = dir.dot(vdif); //  give a (P-C) the direction
-    
     float len = vdif.length(); // get the length of the direction
-    
     float c = len*len - radius*radius; // C of quadratic equation 
     
     float delta = b*b - c;

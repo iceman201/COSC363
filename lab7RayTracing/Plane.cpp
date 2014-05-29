@@ -40,6 +40,9 @@ float Plane::intersect(Vector pos, Vector dir)
     else return -1;
 }
 
+//loadTGA("Wall1.tga");  assume to col
+
+
 // Function to compute the unit normal vector
 // Remember to output a normalised vector!
 Vector Plane::normal(Vector pos)
