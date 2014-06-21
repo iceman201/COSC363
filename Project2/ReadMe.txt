@@ -3,3 +3,6 @@ g++ -Wall -c "%f" ChequeredFloor.cpp Triangle.cpp Cube.cpp Tetrahedron.cpp Cone.
 
 Build commands:
 g++ -Wall -o "%e" ChequeredFloor.cpp Triangle.cpp Cube.cpp Tetrahedron.cpp Cone.cpp Cylinder.cpp Plane.cpp Color.cpp "%f" Sphere.cpp Vector.cpp Object.cpp -lGL -lGLU -lglut
+
+
+Full marks (20/20)
