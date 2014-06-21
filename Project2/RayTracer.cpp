@@ -48,7 +48,6 @@ struct PointBundle
 	int index;
 	float dist;
 };
-
 /*
 * This function compares the given ray with all objects in the scene
 * and computes the closest point  of intersection.
@@ -76,14 +75,12 @@ PointBundle closestPt(Vector pos, Vector dir)
 		}
 	}return out;
 }
-
 /*
 * Computes the colour value obtained by tracing a ray.
 * If reflections and refractions are to be included, then secondary rays will 
 * have to be traced from the point, by converting this method to a recursive
 * procedure.
 */
-
 Color trace(Vector pos, Vector dir, int step)
 {
     PointBundle q = closestPt(pos, dir);
@@ -92,15 +89,13 @@ Color trace(Vector pos, Vector dir, int step)
     Vector n = sceneObjects[q.index]->normal(q.point);
     Vector l = light - q.point;
     Vector l2 = light2 - q.point;
-    l.normalise();
-    l2.normalise();
+    l.normalise(); l2.normalise(); //Normalise the two lights
     float lDotn = l.dot(n);
     float l2Dotn = l2.dot(n);
-
     float non_color = 1.0;
     float Object = 1.01;
-    Color col = sceneObjects[q.index]->getColor(); //Object's colour
-    
+    Color col = sceneObjects[q.index]->getColor(); //Object's colour    
+//-----------------------Texture----------------------------------------
     if((q.index == 5)||(q.index == 9)){
         if ((int(q.point.x) - int(q.point.z)) % 2 == 1) col = Color::BLACK;
         else col = Color::WHITE;
@@ -119,8 +114,7 @@ Color trace(Vector pos, Vector dir, int step)
         if ((int(q.point.x) - int(q.point.y)) % 2 == 1) col = Color::GREEN;
         else col = Color::BLACK;
     }// Texture Sphere
-    
-    //-----------------------Refraction-------------------------------------        
+//-----------------------Refraction-------------------------------------        
     if (q.index == 20 && step < MAX_STEPS) {
         if (!RaygetInside) {
             // Ray entering the Object
@@ -137,13 +131,11 @@ Color trace(Vector pos, Vector dir, int step)
             float cos = sqrt(1-pow((ratio),2)*(1-pow(dir.dot(n),2)));
             n = n*(-1);
             Vector refractionVector = dir*ratio - n*( (ratio)*(dir.dot(n))+cos);
-     
             refractionVector.normalise();
             RaygetInside = !RaygetInside;
             return trace(q.point, refractionVector, step+1);
         }
-    }
-    
+    }    
     if ((l.dot(n) <= 0) and (l2.dot(n) <= 0)){
         colorSum = col.phongLight(backgroundCol,0.0,0.0);
     }
@@ -155,8 +147,7 @@ Color trace(Vector pos, Vector dir, int step)
         Vector v(-dir.x, -dir.y, -dir.z); //View vector; 
         float rDotv = r.dot(v);
         float r2Dotv = r2.dot(v);
-        float spec; 
-        float reflCoeff;
+        float spec;
         if(rDotv < 0) spec = 0.0; 
         else spec = pow(rDotv, 10); //Phong exponent = 10
 
@@ -165,9 +156,7 @@ Color trace(Vector pos, Vector dir, int step)
                 
         PointBundle shadow = closestPt(q.point, l);
         PointBundle shadow2 = closestPt(q.point, l2);
-        
         Vector reflectionVector = ((n*2)*(n.dot(v)))-v;
-        reflCoeff = 0.8;
 //-----------------------Shadow of Light 1------------------------------        
         if (shadow.index == -1){
             colorSum = col.phongLight(backgroundCol, lDotn, spec);
@@ -175,10 +164,9 @@ Color trace(Vector pos, Vector dir, int step)
         if (shadow.index != -1)
         {
             if (q.point.dist(shadow.point) < q.point.dist(light)){
-                colorSum = col.phongLight(backgroundCol, lDotn/3, 0);
+                colorSum = col.phongLight(backgroundCol, lDotn/6, 0);
             }
         }
-        
 //-----------------------Shadow of Light 2------------------------------
         if (shadow2.index == -1){
             colorSum = col.phongLight(backgroundCol, l2Dotn, spec);
@@ -186,7 +174,7 @@ Color trace(Vector pos, Vector dir, int step)
         if (shadow2.index != -1)
         {
             if (q.point.dist(shadow2.point) < q.point.dist(light2)){
-                colorSum = col.phongLight(backgroundCol, l2Dotn/5, 0);
+                colorSum = col.phongLight(backgroundCol, l2Dotn/6, 0);
             }
         }
 //-----------------------Reflection of each component-------------------
@@ -196,15 +184,15 @@ Color trace(Vector pos, Vector dir, int step)
         }//Sphere
         if (q.index == 2 && step < MAX_STEPS){
             Color reflectionCol = trace(q.point,reflectionVector,step+1);
-            colorSum.combineColor(reflectionCol,reflCoeff);
+            colorSum.combineColor(reflectionCol,0.8);
         }//Sphere
-        if (q.index == 300 && step < MAX_STEPS){
+        if (q.index == 3 && step < MAX_STEPS){
             Color reflectionCol = trace(q.point,reflectionVector,step+1);
             colorSum.combineColor(reflectionCol,0.1);
         }//Cylinder
         if (q.index == 4 && step < MAX_STEPS){
             Color reflectionCol = trace(q.point,reflectionVector,step+1);
-            colorSum.combineColor(reflectionCol,0.1);
+            colorSum.combineColor(reflectionCol,0.5);
         }//Cone
         if ((q.index == 7 || q.index == 8)&& step < MAX_STEPS){
             Color reflectionCol = trace(q.point,reflectionVector,step+1);
@@ -221,45 +209,40 @@ Color trace(Vector pos, Vector dir, int step)
     }
     return colorSum;
 }
-
-Color avgCol(Vector eye, Vector dir, float pixelSize, float x1, float y1)
+//-----------------------Anti-Aliasing (Super Sampling)-----------------
+Color Average_Pixel(Vector eye, Vector dir, float pixel, float x1, float y1)
 {
-    int samplingSize = 4;
-    Color colAry[samplingSize];
+    int size = 4; // Sampling size
+    float R = 0, G = 0, B = 0;
+    float half_pixelsize = pixel/2.0;
+    float quarter_pixelsize = pixel/4.0;
+    float xc = x1 + quarter_pixelsize;
+    float yc = y1 + quarter_pixelsize;
+	Color SetOfPixel[size];
     Vector current_dir;
-    float hPxSz = pixelSize/2.0;
-    float qPxSz = pixelSize/4.0;
-    float xc = x1 + qPxSz;
-    float yc = y1 + qPxSz;
- 
+
     current_dir = Vector(xc, yc, -EDIST);
     current_dir.normalise();
-    colAry[0] = trace(eye, current_dir, 1);
- 
-    current_dir = Vector(xc+hPxSz, yc, -EDIST);
+    SetOfPixel[0] = trace(eye, current_dir, 1);
+    current_dir = Vector(xc + half_pixelsize, yc, -EDIST);
     current_dir.normalise();
-    colAry[1] = trace(eye, current_dir, 1);
- 
-    current_dir = Vector(xc, yc+hPxSz, -EDIST);
+    SetOfPixel[1] = trace(eye, current_dir, 1);
+    current_dir = Vector(xc, yc + half_pixelsize, -EDIST);
     current_dir.normalise();
-    colAry[2] = trace(eye, current_dir, 1);
- 
-    current_dir = Vector(xc+hPxSz, yc+hPxSz, -EDIST);
+    SetOfPixel[2] = trace(eye, current_dir, 1);
+    current_dir = Vector(xc + half_pixelsize, yc + half_pixelsize, -EDIST);
     current_dir.normalise();
-    colAry[3] = trace(eye, current_dir, 1);
+    SetOfPixel[3] = trace(eye, current_dir, 1);
  
-    float red = 0, blue = 0, green = 0;
-    for (int i=0; i<samplingSize; i++){
-        red += colAry[i].r;
-        green += colAry[i].g;
-        blue += colAry[i].b;
+    for (int i=0; i<size; i++){
+        R += SetOfPixel[i].r;
+        G += SetOfPixel[i].g;
+        B += SetOfPixel[i].b;
     }
- 
-    red /= samplingSize, green /= samplingSize, blue /= samplingSize;
-    Color col(red, green, blue);
+    //Split it into x4 and found the average color, then return the average.
+    Color col(R/size,G/size,B/size);
     return col;
 }
-
 //---The main display module -----------------------------------------------------------
 // In a ray tracing application, it just displays the ray traced image by drawing
 // each pixel as quads.
@@ -284,13 +267,11 @@ void display()
 		{
 			y1 = YMIN + j*pixelSize;
 			yc = y1 + halfPixelSize;
-            
 		    Vector dir(xc, yc, -EDIST);	//direction of the primary ray
-		    
-            Color col_ss = avgCol(eye,dir,pixelSize,x1,y1);
-            
+			Color col_ss = Average_Pixel(eye,dir,pixelSize,x1,y1); //Calling Super Sampling function
             dir.normalise();			//Normalise this direction
-		    Color col = trace (eye, dir, 1);//col_ss; //Trace the primary ray and get the colour value
+		    Color col = col_ss;//trace (eye, dir, 1);  //For the Super Sampling. If want turn off anti-aliasing
+								// replace it to "trace (eye, dir, 1);" 
 			glColor3f(col.r, col.g, col.b);
 			glVertex2f(x1, y1);				//Draw each pixel with its color value
 			glVertex2f(x1 + pixelSize, y1);
@@ -316,9 +297,9 @@ void initialize()
     sceneObjects.push_back(sphere1);
     Sphere *sphere2 = new Sphere(Vector(-15, -15, -90), 5.0, Color::GRAY);
     sceneObjects.push_back(sphere2);
-    Cylinder *cylinder3 = new Cylinder(Vector(5, 0, -120), 3, 10.0, Color(.205,.181,.205));
+    Cylinder *cylinder3 = new Cylinder(Vector(-10, 0, -120), 3, 10.0, Color(.205,.181,.205));
     sceneObjects.push_back(cylinder3);    
-    Cone *cone4 = new Cone(Vector(0, -16, -80), 3.0, 8.0, Color(.100,.149,.237));
+    Cone *cone4 = new Cone(Vector(3.5, -18, -80), 2.0, 6.0, Color(.100,.149,.237));
     sceneObjects.push_back(cone4);
 //-----------------------Wall & Floor---------------------------------
     Plane *plane5 = new Plane(Vector(-20,-20,-30),Vector(20,-20,-30),Vector(20,-20,-150),Vector(-20,-20,-150), Color(1,1,1));
@@ -347,7 +328,7 @@ void initialize()
     Plane *right_15 = new Plane(f,g,c,b,Color::GREEN);
     sceneObjects.push_back(right_15);
 //-----------------------Tetrahedron------------------------------------
-    Vector ta = Vector(-6,-14,-100); Vector tb = Vector(-3,-14,-110); Vector tc = Vector(-9,-14,-110); Vector top = Vector(-5.5,0,-115);  
+    Vector ta = Vector(-6,-14,-100); Vector tb = Vector(-3,-14,-110); Vector tc = Vector(-9,-14,-110); Vector top = Vector(-5.5,0,-112.5);  
     Tetrahedron *left_16 = new Tetrahedron(ta,top,tc,Color::BLUE);
     sceneObjects.push_back(left_16);
     Tetrahedron *right_17 = new Tetrahedron(ta,tb,top,Color::GREEN);
@@ -357,7 +338,7 @@ void initialize()
     Tetrahedron *bottom_19 = new Tetrahedron(ta,tb,tc,Color::BLACK);
     sceneObjects.push_back(bottom_19);
 //-----------------------Air Bubble-------------------------------------
-    Sphere *sphere20 = new Sphere(Vector(-10, 0, -100), 6.0, Color::BLACK);
+    Sphere *sphere20 = new Sphere(Vector(-5, -15, -80), 3.6, Color(.205,.181,.205));
     sceneObjects.push_back(sphere20);
 }
 
@@ -367,7 +348,7 @@ int main(int argc, char *argv[])
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB );
     glutInitWindowSize(600, 600);
     glutInitWindowPosition(20, 20);
-    glutCreateWindow("Raytracing");
+    glutCreateWindow("Raytracing By Liguo Jiao");
     glutInitContextVersion (4, 2);
     glutInitContextProfile (GLUT_CORE_PROFILE);
     
