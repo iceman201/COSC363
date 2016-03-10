@@ -1,4 +1,4 @@
 COSC363
 =======
 
-computer graphics
+:european_castle:OpenGL computer graphics:european_castle:
